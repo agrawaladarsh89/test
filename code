@@ -1,0 +1,179 @@
+import streamlit as st
+import subprocess
+import json
+from typing import List, Optional
+
+def run_command(command: str) -> tuple[bool, str]:
+    """
+    Execute a shell command and return success status and output
+    """
+    try:
+        result = subprocess.run(
+            command, 
+            shell=True, 
+            capture_output=True, 
+            text=True, 
+            timeout=30
+        )
+        return result.returncode == 0, result.stdout.strip()
+    except subprocess.TimeoutExpired:
+        return False, "Command timed out"
+    except Exception as e:
+        return False, f"Error executing command: {str(e)}"
+
+def get_services_for_project(project: str) -> List[str]:
+    """
+    Get list of services for a given project by running pcm run <projectname>
+    """
+    command = f"pcm run {project}"
+    success, output = run_command(command)
+    
+    if success and output:
+        # Assuming the command returns services one per line or comma-separated
+        # Adjust this parsing logic based on your actual pcm command output format
+        services = [service.strip() for service in output.split('\n') if service.strip()]
+        return services
+    else:
+        # Return empty list if command fails
+        st.error(f"Failed to get services for project {project}: {output}")
+        return []
+
+def main():
+    # Page configuration
+    st.set_page_config(
+        page_title="PCM Lifecycle Management",
+        page_icon="⚙️",
+        layout="wide"
+    )
+    
+    # Main heading
+    st.title("🔧 PCM Lifecycle Management")
+    st.markdown("---")
+    
+    # Initialize session state
+    if 'services' not in st.session_state:
+        st.session_state.services = []
+    if 'selected_project' not in st.session_state:
+        st.session_state.selected_project = None
+    if 'show_confirmation' not in st.session_state:
+        st.session_state.show_confirmation = False
+    if 'pending_command' not in st.session_state:
+        st.session_state.pending_command = ""
+    
+    # Create columns for layout
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        st.subheader("Configuration")
+        
+        # Project dropdown
+        projects = ['A', 'B', 'C']
+        selected_project = st.selectbox(
+            "Select Project:",
+            options=[None] + projects,
+            format_func=lambda x: "Select a project..." if x is None else x,
+            key="project_select"
+        )
+        
+        # Auto-populate services when project changes
+        if selected_project != st.session_state.selected_project and selected_project is not None:
+            st.session_state.selected_project = selected_project
+            with st.spinner(f"Loading services for project {selected_project}..."):
+                st.session_state.services = get_services_for_project(selected_project)
+        
+        # Service dropdown (auto-populated)
+        selected_service = None
+        if selected_project and st.session_state.services:
+            selected_service = st.selectbox(
+                "Select Service:",
+                options=[None] + st.session_state.services,
+                format_func=lambda x: "Select a service..." if x is None else x,
+                key="service_select"
+            )
+        elif selected_project and not st.session_state.services:
+            st.warning("No services found for the selected project or failed to load services.")
+        elif selected_project is None:
+            st.info("Please select a project first to load services.")
+        
+        # Todo dropdown
+        todo_options = ['Start', 'Stop', 'Restart']
+        selected_todo = st.selectbox(
+            "Select Action:",
+            options=[None] + todo_options,
+            format_func=lambda x: "Select an action..." if x is None else x,
+            key="todo_select"
+        )
+        
+        st.markdown("---")
+        
+        # Validation and Run button
+        all_selected = all([selected_project, selected_service, selected_todo])
+        
+        if all_selected:
+            st.success("✅ All options selected. Ready to run command.")
+            command = f"pcm {selected_todo.lower()} {selected_project} {selected_service}"
+            st.code(f"Command to execute: {command}", language="bash")
+            
+            if st.button("🚀 Run Command", type="primary", use_container_width=True):
+                st.session_state.show_confirmation = True
+                st.session_state.pending_command = command
+        else:
+            missing_items = []
+            if not selected_project:
+                missing_items.append("Project")
+            if not selected_service:
+                missing_items.append("Service")
+            if not selected_todo:
+                missing_items.append("Action")
+            
+            st.warning(f"⚠️ Please select: {', '.join(missing_items)}")
+            st.button("🚀 Run Command", disabled=True, use_container_width=True)
+    
+    with col2:
+        st.subheader("Current Selection")
+        
+        # Display current selections
+        st.info(f"**Project:** {selected_project or 'Not selected'}")
+        st.info(f"**Service:** {selected_service or 'Not selected'}")
+        st.info(f"**Action:** {selected_todo or 'Not selected'}")
+        
+        if st.session_state.services and selected_project:
+            st.success(f"Found {len(st.session_state.services)} services for project {selected_project}")
+    
+    # Confirmation dialog
+    if st.session_state.show_confirmation:
+        st.markdown("---")
+        st.subheader("⚠️ Confirmation Required")
+        
+        st.warning(f"**Are you sure you want to execute the following command?**")
+        st.code(st.session_state.pending_command, language="bash")
+        
+        col_yes, col_no = st.columns(2)
+        
+        with col_yes:
+            if st.button("✅ Yes, Execute", type="primary", use_container_width=True):
+                # Execute the command
+                with st.spinner("Executing command..."):
+                    success, output = run_command(st.session_state.pending_command)
+                
+                if success:
+                    st.success("✅ Command executed successfully!")
+                    if output:
+                        st.text_area("Command Output:", value=output, height=150)
+                else:
+                    st.error("❌ Command execution failed!")
+                    if output:
+                        st.text_area("Error Output:", value=output, height=150)
+                
+                # Reset confirmation state
+                st.session_state.show_confirmation = False
+                st.session_state.pending_command = ""
+        
+        with col_no:
+            if st.button("❌ No, Cancel", use_container_width=True):
+                st.session_state.show_confirmation = False
+                st.session_state.pending_command = ""
+                st.info("Command execution cancelled.")
+
+if __name__ == "__main__":
+    main()
