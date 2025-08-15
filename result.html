@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Execution Result - DWS PCF Operations Management{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-sm">
+            <div class="card-header {% if success %}bg-success{% else %}bg-danger{% endif %} text-white">
+                <h5 class="mb-0">
+                    {% if success %}
+                    <i class="fas fa-check-circle"></i> Command Executed Successfully
+                    {% else %}
+                    <i class="fas fa-times-circle"></i> Command Execution Failed
+                    {% endif %}
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label"><strong>Executed Command:</strong></label>
+                    <div class="command-display">{{ command }}</div>
+                </div>
+                
+                {% if success %}
+                <div class="alert alert-success" role="alert">
+                    <i class="fas fa-check-circle"></i> Command executed successfully!
+                </div>
+                {% else %}
+                <div class="alert alert-danger" role="alert">
+                    <i class="fas fa-times-circle"></i> Command execution failed!
+                </div>
+                {% endif %}
+                
+                {% if output %}
+                <div class="mb-3">
+                    <label class="form-label">
+                        <strong>
+                            {% if success %}Command Output:{% else %}Error Output:{% endif %}
+                        </strong>
+                    </label>
+                    <textarea class="form-control" rows="10" readonly style="font-family: 'Courier New', monospace; background-color: {% if success %}#f8f9fa{% else %}#fff5f5{% endif %};">{{ output }}</textarea>
+                </div>
+                {% endif %}
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-arrow-left"></i> Back to Main
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
