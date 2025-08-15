@@ -104,8 +104,15 @@ def index():
             return ['prd']
         return []
     
-    datacentres = ['edi01', 'edi02']
-    todo_options = ['start', 'stop', 'restart']
+    # Dynamic foundations based on environment
+    def get_foundations_for_environment(env):
+        if env == 'dev-pnf':
+            return ['EDI01_DEV', 'EDI02_DEV']
+        elif env == 'prd-pnf':
+            return ['EDI01_PRD', 'EDI02_PRD']
+        return []
+    
+    todo_options = ['start', 'stop', 'restage']
     
     # Initialize session variables if they don't exist
     if 'microservices' not in session:
@@ -120,17 +127,23 @@ def index():
     selected_application = request.form.get('application')
     selected_environment = request.form.get('environment')
     selected_space = request.form.get('space')
-    selected_datacentre = request.form.get('datacentre')
+    selected_foundation = request.form.get('foundation')
     selected_microservice = request.form.get('microservice')
     selected_action = request.form.get('action')
     
     # Get available spaces for selected environment
     available_spaces = get_spaces_for_environment(selected_environment) if selected_environment else []
     
+    # Get available foundations for selected environment
+    available_foundations = get_foundations_for_environment(selected_environment) if selected_environment else []
+    
     # Reset space selection if environment changed and current space is not valid
     if selected_environment != session.get('selected_environment'):
         if selected_space and selected_space not in available_spaces:
             selected_space = None
+        # Also reset foundation selection if environment changed
+        if selected_foundation and selected_foundation not in available_foundations:
+            selected_foundation = None
     
     microservices = []
     microservice_error = None
@@ -154,10 +167,10 @@ def index():
         microservices = session.get('microservices', [])
     
     # Check if all options are selected
-    all_selected = all([selected_application, selected_environment, selected_space, selected_datacentre, selected_microservice, selected_action])
+    all_selected = all([selected_application, selected_environment, selected_space, selected_foundation, selected_microservice, selected_action])
     command = None
     if all_selected:
-        command = f"dws pcf operations {selected_action} -c {selected_application} -e {selected_environment} -s {selected_space} -a {selected_microservice} -f {selected_datacentre} --action {selected_action}"
+        command = f"dws pcf operations {selected_action} -e {selected_environment} -c {selected_application} -s {selected_space} -a {selected_microservice} -x {selected_action} --foundation={selected_foundation}"
     
     # Calculate missing items
     missing_items = []
@@ -167,8 +180,8 @@ def index():
         missing_items.append("Environment")
     if not selected_space:
         missing_items.append("Space")
-    if not selected_datacentre:
-        missing_items.append("Datacentre")
+    if not selected_foundation:
+        missing_items.append("Foundation")
     if not selected_microservice:
         missing_items.append("Microservice")
     if not selected_action:
@@ -178,12 +191,12 @@ def index():
                          applications=applications,
                          environments=environments,
                          available_spaces=available_spaces,
-                         datacentres=datacentres,
+                         available_foundations=available_foundations,
                          todo_options=todo_options,
                          selected_application=selected_application,
                          selected_environment=selected_environment,
                          selected_space=selected_space,
-                         selected_datacentre=selected_datacentre,
+                         selected_foundation=selected_foundation,
                          selected_microservice=selected_microservice,
                          selected_action=selected_action,
                          microservices=microservices,
@@ -211,6 +224,26 @@ def get_spaces():
     return jsonify({
         'spaces': spaces,
         'count': len(spaces)
+    })
+
+@app.route('/get_foundations', methods=['POST'])
+def get_foundations():
+    """AJAX endpoint to get foundations for an environment"""
+    environment = request.json.get('environment')
+    
+    if not environment:
+        return jsonify({'error': 'Environment must be specified'}), 400
+    
+    if environment == 'dev-pnf':
+        foundations = ['EDI01_DEV', 'EDI02_DEV']
+    elif environment == 'prd-pnf':
+        foundations = ['EDI01_PRD', 'EDI02_PRD']
+    else:
+        foundations = []
+    
+    return jsonify({
+        'foundations': foundations,
+        'count': len(foundations)
     })
 
 @app.route('/get_microservices', methods=['POST'])
@@ -255,7 +288,7 @@ def confirm_command():
     selected_application = request.form.get('application')
     selected_environment = request.form.get('environment')
     selected_space = request.form.get('space')
-    selected_datacentre = request.form.get('datacentre')
+    selected_foundation = request.form.get('foundation')
     selected_microservice = request.form.get('microservice')
     selected_action = request.form.get('action')
     
@@ -264,7 +297,7 @@ def confirm_command():
                          selected_application=selected_application,
                          selected_environment=selected_environment,
                          selected_space=selected_space,
-                         selected_datacentre=selected_datacentre,
+                         selected_foundation=selected_foundation,
                          selected_microservice=selected_microservice,
                          selected_action=selected_action)
 
