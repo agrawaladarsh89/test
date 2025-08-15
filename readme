@@ -1,0 +1,52 @@
+Here is a README.md file explaining the code in a way that a non-technical person can understand.
+
+🚀 Microservice Management Tool
+This is a simple web application built with Python and Flask. Its purpose is to give you an easy-to-use graphical interface (GUI) to manage microservices without having to remember and type complex command-line instructions.
+
+Think of it as a friendly control panel for your microservices.
+
+🤔 What It Does
+This tool lets you:
+
+Select a specific Application, Environment, Space, and Foundation.
+
+View a list of all the microservices associated with your selections. This list is loaded dynamically, so you always see the correct services.
+
+Choose an action to perform on a microservice (e.g., start, stop, or restage).
+
+See the exact command that will be run.
+
+Confirm the action before it happens.
+
+View the final result of the command, including any output or error messages.
+
+The main benefit is that you don't need to manually log in to a system and type a long command every time you want to manage a service. This tool handles the details for you.
+
+🛠️ How It Works (Simplified)
+The application works by following a series of steps to get information and then perform an action.
+
+1. The Control Panel (The Web Page)
+The main page (index.html) is where you make all your selections using dropdown menus.
+
+When you pick an Environment, the code "knows" what Spaces and Foundations are available and updates the other dropdowns instantly. It does this using a technique called AJAX to communicate with the server in the background without reloading the entire page.
+
+2. Finding Microservices
+Once you select an Application, Environment, and Space, the application runs a specific command in the background:
+dws pcf get apps -c [application] -e [environment] -s [space]
+
+This command is like asking the system, "Hey, can you give me a list of all the apps for these settings?"
+
+The code then takes the raw text output from that command and carefully cleans it up to create a simple, readable list of microservice names.
+
+3. Building the Command
+As you make all your selections (application, environment, space, foundation, microservice, and action), the application automatically builds the final command string.
+
+For example, if you choose to start the customer-service microservice in the dev space of the dev-pnf environment, the application assembles this command:
+dws pcf operations start -e dev-pnf -c IFP -s dev -a customer-service -x start --foundation=EDI01_DEV
+
+4. Confirmation & Execution
+Before running anything, the tool shows you the complete command one last time on a confirmation page. This is a safety check to make sure you are doing exactly what you intended.
+
+Once you click "Execute," the application runs the command and displays the success or failure message and any output from the system on a results page.
+
+The core of the application is the ability to securely run system commands and handle their output, all from an intuitive web page.
