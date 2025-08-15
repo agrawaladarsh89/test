@@ -33,10 +33,39 @@ def get_microservices_for_app_env_space(application: str, environment: str, spac
     success, output = run_command(command)
     
     if success and output:
-        # Assuming the command returns microservices one per line or comma-separated
-        # Adjust this parsing logic based on your actual dws pcf command output format
-        microservices = [service.strip() for service in output.split('\n') if service.strip()]
-        return microservices
+        # Parse the output to extract microservice names
+        # This assumes the output is either:
+        # 1. One microservice per line
+        # 2. JSON array format
+        # 3. Comma/space separated values
+        
+        microservices = []
+        
+        # Try to parse as JSON first
+        try:
+            import json
+            parsed = json.loads(output)
+            if isinstance(parsed, list):
+                microservices = [str(item).strip() for item in parsed if str(item).strip()]
+            elif isinstance(parsed, dict) and 'apps' in parsed:
+                microservices = [str(app).strip() for app in parsed['apps'] if str(app).strip()]
+            else:
+                microservices = [str(parsed).strip()] if str(parsed).strip() else []
+        except (json.JSONDecodeError, ValueError):
+            # If not JSON, try line-by-line parsing
+            lines = output.split('\n')
+            for line in lines:
+                line = line.strip()
+                if line and not line.startswith('#') and not line.startswith('-'):
+                    # Skip header lines or comment lines
+                    # Split by common separators and take the first meaningful part
+                    parts = line.split()
+                    if parts:
+                        microservices.append(parts[0])
+        
+        # Remove duplicates and empty entries
+        microservices = list(set([ms for ms in microservices if ms and ms.strip()]))
+        return sorted(microservices)
     else:
         # Return empty list if command fails
         return []
@@ -44,8 +73,16 @@ def get_microservices_for_app_env_space(application: str, environment: str, spac
 @app.route('/', methods=['GET', 'POST'])
 def index():
     applications = ['IFP', 'ODRP', 'FACFLOW']
-    environments = ['dev-pnf', 'prod-pnf']
-    spaces = ['DEV', 'NFT', 'SIT']
+    environments = ['dev-pnf', 'prd-pnf']
+    
+    # Dynamic spaces based on environment
+    def get_spaces_for_environment(env):
+        if env == 'dev-pnf':
+            return ['dev', 'nft', 'sit']
+        elif env == 'prd-pnf':
+            return ['prd']
+        return []
+    
     datacentres = ['edi01', 'edi02']
     todo_options = ['start', 'stop', 'restart']
     
@@ -65,6 +102,14 @@ def index():
     selected_datacentre = request.form.get('datacentre')
     selected_microservice = request.form.get('microservice')
     selected_action = request.form.get('action')
+    
+    # Get available spaces for selected environment
+    available_spaces = get_spaces_for_environment(selected_environment) if selected_environment else []
+    
+    # Reset space selection if environment changed and current space is not valid
+    if selected_environment != session.get('selected_environment'):
+        if selected_space and selected_space not in available_spaces:
+            selected_space = None
     
     microservices = []
     microservice_error = None
@@ -111,7 +156,7 @@ def index():
     return render_template('index.html', 
                          applications=applications,
                          environments=environments,
-                         spaces=spaces,
+                         available_spaces=available_spaces,
                          datacentres=datacentres,
                          todo_options=todo_options,
                          selected_application=selected_application,
@@ -126,6 +171,26 @@ def index():
                          command=command,
                          missing_items=missing_items,
                          microservice_count=len(microservices) if microservices else 0)
+
+@app.route('/get_spaces', methods=['POST'])
+def get_spaces():
+    """AJAX endpoint to get spaces for an environment"""
+    environment = request.json.get('environment')
+    
+    if not environment:
+        return jsonify({'error': 'Environment must be specified'}), 400
+    
+    if environment == 'dev-pnf':
+        spaces = ['dev', 'nft', 'sit']
+    elif environment == 'prd-pnf':
+        spaces = ['prd']
+    else:
+        spaces = []
+    
+    return jsonify({
+        'spaces': spaces,
+        'count': len(spaces)
+    })
 
 @app.route('/get_microservices', methods=['POST'])
 def get_microservices():
