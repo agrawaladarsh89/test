@@ -39,14 +39,23 @@
                     <!-- Space Selection -->
                     <div class="mb-3">
                         <label for="space" class="form-label">3. Select Space:</label>
-                        <select class="form-select" id="space" name="space" required>
-                            <option value="">Select a space...</option>
-                            {% for space in spaces %}
+                        <select class="form-select" id="space" name="space" {% if not selected_environment %}disabled{% endif %} required>
+                            <option value="">
+                                {% if not selected_environment %}
+                                    Please select an environment first
+                                {% else %}
+                                    Select a space...
+                                {% endif %}
+                            </option>
+                            {% for space in available_spaces %}
                             <option value="{{ space }}" {% if space == selected_space %}selected{% endif %}>
                                 {{ space }}
                             </option>
                             {% endfor %}
                         </select>
+                        <div id="spaceLoading" class="text-muted mt-1" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading spaces...
+                        </div>
                     </div>
 
                     <!-- Datacentre Selection -->
@@ -184,6 +193,60 @@
 
 {% block scripts %}
 <script>
+function updateSpaces() {
+    const environment = document.getElementById('environment').value;
+    const spaceSelect = document.getElementById('space');
+    const spaceLoading = document.getElementById('spaceLoading');
+    const form = document.getElementById('configForm');
+    
+    if (!environment) {
+        spaceSelect.innerHTML = '<option value="">Please select an environment first</option>';
+        spaceSelect.disabled = true;
+        // Also reset microservice dropdown
+        const microserviceSelect = document.getElementById('microservice');
+        microserviceSelect.innerHTML = '<option value="">Please select application, environment and space first to load microservices</option>';
+        microserviceSelect.disabled = true;
+        return;
+    }
+    
+    // Show loading state
+    spaceLoading.style.display = 'block';
+    spaceSelect.disabled = true;
+    spaceSelect.innerHTML = '<option value="">Loading spaces...</option>';
+    
+    // Make AJAX request to get spaces
+    axios.post('/get_spaces', {
+        environment: environment
+    })
+    .then(function(response) {
+        const spaces = response.data.spaces;
+        
+        // Update space dropdown
+        spaceSelect.innerHTML = '<option value="">Select a space...</option>';
+        spaces.forEach(function(space) {
+            const option = document.createElement('option');
+            option.value = space;
+            option.textContent = space;
+            spaceSelect.appendChild(option);
+        });
+        
+        spaceSelect.disabled = false;
+        
+        // Reset microservice dropdown when spaces change
+        const microserviceSelect = document.getElementById('microservice');
+        microserviceSelect.innerHTML = '<option value="">Please select application, environment and space first to load microservices</option>';
+        microserviceSelect.disabled = true;
+    })
+    .catch(function(error) {
+        console.error('Error loading spaces:', error);
+        spaceSelect.innerHTML = '<option value="">Error loading spaces</option>';
+        spaceSelect.disabled = false;
+    })
+    .finally(function() {
+        spaceLoading.style.display = 'none';
+    });
+}
+
 function updateMicroservices() {
     const application = document.getElementById('application').value;
     const environment = document.getElementById('environment').value;
@@ -240,7 +303,10 @@ function updateMicroservices() {
 }
 
 document.getElementById('application').addEventListener('change', updateMicroservices);
-document.getElementById('environment').addEventListener('change', updateMicroservices);
+document.getElementById('environment').addEventListener('change', function() {
+    updateSpaces();
+    updateMicroservices();
+});
 document.getElementById('space').addEventListener('change', updateMicroservices);
 
 // Auto-submit form when selections change (to update the command display)
