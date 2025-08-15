@@ -91,12 +91,12 @@
 
                     <!-- Action Selection -->
                     <div class="mb-3">
-                        <label for="todo" class="form-label">Select Action:</label>
-                        <select class="form-select" id="todo" name="todo" required>
+                        <label for="action" class="form-label">6. Select Action:</label>
+                        <select class="form-select" id="action" name="action" required>
                             <option value="">Select an action...</option>
-                            {% for todo in todo_options %}
-                            <option value="{{ todo }}" {% if todo == selected_todo %}selected{% endif %}>
-                                {{ todo }}
+                            {% for action in todo_options %}
+                            <option value="{{ action }}" {% if action == selected_action %}selected{% endif %}>
+                                {{ action }}
                             </option>
                             {% endfor %}
                         </select>
@@ -158,16 +158,22 @@
                     <strong>Environment:</strong> {{ selected_environment or 'Not selected' }}
                 </div>
                 <div class="selection-card p-3 mb-2 rounded">
-                    <strong>Service:</strong> {{ selected_service or 'Not selected' }}
+                    <strong>Space:</strong> {{ selected_space or 'Not selected' }}
+                </div>
+                <div class="selection-card p-3 mb-2 rounded">
+                    <strong>Datacentre:</strong> {{ selected_datacentre or 'Not selected' }}
+                </div>
+                <div class="selection-card p-3 mb-2 rounded">
+                    <strong>Microservice:</strong> {{ selected_microservice or 'Not selected' }}
                 </div>
                 <div class="selection-card p-3 mb-3 rounded">
-                    <strong>Action:</strong> {{ selected_todo or 'Not selected' }}
+                    <strong>Action:</strong> {{ selected_action or 'Not selected' }}
                 </div>
                 
-                {% if services and selected_application and selected_environment %}
+                {% if microservices and selected_application and selected_environment and selected_space %}
                 <div class="alert alert-success" role="alert">
                     <i class="fas fa-check-circle"></i> 
-                    Found {{ service_count }} services for {{ selected_application }} in {{ selected_environment }}
+                    Found {{ microservice_count }} microservices for {{ selected_application }} in {{ selected_environment }}/{{ selected_space }}
                 </div>
                 {% endif %}
             </div>
@@ -178,70 +184,79 @@
 
 {% block scripts %}
 <script>
-function updateServices() {
+function updateMicroservices() {
     const application = document.getElementById('application').value;
     const environment = document.getElementById('environment').value;
-    const serviceSelect = document.getElementById('service');
-    const serviceLoading = document.getElementById('serviceLoading');
+    const space = document.getElementById('space').value;
+    const microserviceSelect = document.getElementById('microservice');
+    const microserviceLoading = document.getElementById('microserviceLoading');
     const form = document.getElementById('configForm');
     
-    if (!application || !environment) {
-        serviceSelect.innerHTML = '<option value="">Please select application and environment first to load services</option>';
-        serviceSelect.disabled = true;
+    if (!application || !environment || !space) {
+        microserviceSelect.innerHTML = '<option value="">Please select application, environment and space first to load microservices</option>';
+        microserviceSelect.disabled = true;
         return;
     }
     
     // Show loading state
-    serviceLoading.style.display = 'block';
-    serviceSelect.disabled = true;
-    serviceSelect.innerHTML = '<option value="">Loading services...</option>';
+    microserviceLoading.style.display = 'block';
+    microserviceSelect.disabled = true;
+    microserviceSelect.innerHTML = '<option value="">Loading microservices...</option>';
     form.classList.add('loading');
     
-    // Make AJAX request to get services
-    axios.post('/get_services', {
+    // Make AJAX request to get microservices
+    axios.post('/get_microservices', {
         application: application,
-        environment: environment
+        environment: environment,
+        space: space
     })
     .then(function(response) {
-        const services = response.data.services;
+        const microservices = response.data.microservices;
         const count = response.data.count;
         
-        // Update service dropdown
-        serviceSelect.innerHTML = '<option value="">Select a service...</option>';
-        services.forEach(function(service) {
+        // Update microservice dropdown
+        microserviceSelect.innerHTML = '<option value="">Select a microservice...</option>';
+        microservices.forEach(function(microservice) {
             const option = document.createElement('option');
-            option.value = service;
-            option.textContent = service;
-            serviceSelect.appendChild(option);
+            option.value = microservice;
+            option.textContent = microservice;
+            microserviceSelect.appendChild(option);
         });
         
-        serviceSelect.disabled = false;
+        microserviceSelect.disabled = false;
         
-        // Update the form to refresh the page with new services
+        // Update the form to refresh the page with new microservices
         form.submit();
     })
     .catch(function(error) {
-        console.error('Error loading services:', error);
-        serviceSelect.innerHTML = '<option value="">Error loading services</option>';
-        serviceSelect.disabled = false;
+        console.error('Error loading microservices:', error);
+        microserviceSelect.innerHTML = '<option value="">Error loading microservices</option>';
+        microserviceSelect.disabled = false;
     })
     .finally(function() {
-        serviceLoading.style.display = 'none';
+        microserviceLoading.style.display = 'none';
         form.classList.remove('loading');
     });
 }
 
-document.getElementById('application').addEventListener('change', updateServices);
-document.getElementById('environment').addEventListener('change', updateServices);
+document.getElementById('application').addEventListener('change', updateMicroservices);
+document.getElementById('environment').addEventListener('change', updateMicroservices);
+document.getElementById('space').addEventListener('change', updateMicroservices);
 
 // Auto-submit form when selections change (to update the command display)
-document.getElementById('service').addEventListener('change', function() {
+document.getElementById('datacentre').addEventListener('change', function() {
     if (this.value) {
         document.getElementById('configForm').submit();
     }
 });
 
-document.getElementById('todo').addEventListener('change', function() {
+document.getElementById('microservice').addEventListener('change', function() {
+    if (this.value) {
+        document.getElementById('configForm').submit();
+    }
+});
+
+document.getElementById('action').addEventListener('change', function() {
     if (this.value) {
         document.getElementById('configForm').submit();
     }
