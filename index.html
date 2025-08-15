@@ -58,17 +58,26 @@
                         </div>
                     </div>
 
-                    <!-- Datacentre Selection -->
+                    <!-- Foundation Selection -->
                     <div class="mb-3">
-                        <label for="datacentre" class="form-label">4. Select Datacentre:</label>
-                        <select class="form-select" id="datacentre" name="datacentre" required>
-                            <option value="">Select a datacentre...</option>
-                            {% for dc in datacentres %}
-                            <option value="{{ dc }}" {% if dc == selected_datacentre %}selected{% endif %}>
-                                {{ dc }}
+                        <label for="foundation" class="form-label">4. Select Foundation:</label>
+                        <select class="form-select" id="foundation" name="foundation" {% if not selected_environment %}disabled{% endif %} required>
+                            <option value="">
+                                {% if not selected_environment %}
+                                    Please select an environment first
+                                {% else %}
+                                    Select a foundation...
+                                {% endif %}
+                            </option>
+                            {% for foundation in available_foundations %}
+                            <option value="{{ foundation }}" {% if foundation == selected_foundation %}selected{% endif %}>
+                                {{ foundation }}
                             </option>
                             {% endfor %}
                         </select>
+                        <div id="foundationLoading" class="text-muted mt-1" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading foundations...
+                        </div>
                     </div>
 
                     <!-- Microservice Selection -->
@@ -106,19 +115,6 @@
                             {% for action in todo_options %}
                             <option value="{{ action }}" {% if action == selected_action %}selected{% endif %}>
                                 {{ action }}
-                            </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-
-                    <!-- Action Selection -->
-                    <div class="mb-3">
-                        <label for="todo" class="form-label">Select Action:</label>
-                        <select class="form-select" id="todo" name="todo" required>
-                            <option value="">Select an action...</option>
-                            {% for todo in todo_options %}
-                            <option value="{{ todo }}" {% if todo == selected_todo %}selected{% endif %}>
-                                {{ todo }}
                             </option>
                             {% endfor %}
                         </select>
@@ -170,7 +166,7 @@
                     <strong>Space:</strong> {{ selected_space or 'Not selected' }}
                 </div>
                 <div class="selection-card p-3 mb-2 rounded">
-                    <strong>Datacentre:</strong> {{ selected_datacentre or 'Not selected' }}
+                    <strong>Foundation:</strong> {{ selected_foundation or 'Not selected' }}
                 </div>
                 <div class="selection-card p-3 mb-2 rounded">
                     <strong>Microservice:</strong> {{ selected_microservice or 'Not selected' }}
@@ -193,6 +189,50 @@
 
 {% block scripts %}
 <script>
+function updateFoundations() {
+    const environment = document.getElementById('environment').value;
+    const foundationSelect = document.getElementById('foundation');
+    const foundationLoading = document.getElementById('foundationLoading');
+    
+    if (!environment) {
+        foundationSelect.innerHTML = '<option value="">Please select an environment first</option>';
+        foundationSelect.disabled = true;
+        return;
+    }
+    
+    // Show loading state
+    foundationLoading.style.display = 'block';
+    foundationSelect.disabled = true;
+    foundationSelect.innerHTML = '<option value="">Loading foundations...</option>';
+    
+    // Make AJAX request to get foundations
+    axios.post('/get_foundations', {
+        environment: environment
+    })
+    .then(function(response) {
+        const foundations = response.data.foundations;
+        
+        // Update foundation dropdown
+        foundationSelect.innerHTML = '<option value="">Select a foundation...</option>';
+        foundations.forEach(function(foundation) {
+            const option = document.createElement('option');
+            option.value = foundation;
+            option.textContent = foundation;
+            foundationSelect.appendChild(option);
+        });
+        
+        foundationSelect.disabled = false;
+    })
+    .catch(function(error) {
+        console.error('Error loading foundations:', error);
+        foundationSelect.innerHTML = '<option value="">Error loading foundations</option>';
+        foundationSelect.disabled = false;
+    })
+    .finally(function() {
+        foundationLoading.style.display = 'none';
+    });
+}
+
 function updateSpaces() {
     const environment = document.getElementById('environment').value;
     const spaceSelect = document.getElementById('space');
@@ -305,12 +345,13 @@ function updateMicroservices() {
 document.getElementById('application').addEventListener('change', updateMicroservices);
 document.getElementById('environment').addEventListener('change', function() {
     updateSpaces();
+    updateFoundations();
     updateMicroservices();
 });
 document.getElementById('space').addEventListener('change', updateMicroservices);
 
 // Auto-submit form when selections change (to update the command display)
-document.getElementById('datacentre').addEventListener('change', function() {
+document.getElementById('foundation').addEventListener('change', function() {
     if (this.value) {
         document.getElementById('configForm').submit();
     }
