@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <!-- Configuration Column -->
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-cog"></i> Configuration</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="configForm">
+                    <!-- Application Selection -->
+                    <div class="mb-3">
+                        <label for="application" class="form-label">1. Select Application:</label>
+                        <select class="form-select" id="application" name="application" required>
+                            <option value="">Select an application...</option>
+                            {% for app in applications %}
+                            <option value="{{ app }}" {% if app == selected_application %}selected{% endif %}>
+                                {{ app }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Environment Selection -->
+                    <div class="mb-3">
+                        <label for="environment" class="form-label">2. Select Environment:</label>
+                        <select class="form-select" id="environment" name="environment" required>
+                            <option value="">Select an environment...</option>
+                            {% for env in environments %}
+                            <option value="{{ env }}" {% if env == selected_environment %}selected{% endif %}>
+                                {{ env }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Space Selection -->
+                    <div class="mb-3">
+                        <label for="space" class="form-label">3. Select Space:</label>
+                        <select class="form-select" id="space" name="space" required>
+                            <option value="">Select a space...</option>
+                            {% for space in spaces %}
+                            <option value="{{ space }}" {% if space == selected_space %}selected{% endif %}>
+                                {{ space }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Datacentre Selection -->
+                    <div class="mb-3">
+                        <label for="datacentre" class="form-label">4. Select Datacentre:</label>
+                        <select class="form-select" id="datacentre" name="datacentre" required>
+                            <option value="">Select a datacentre...</option>
+                            {% for dc in datacentres %}
+                            <option value="{{ dc }}" {% if dc == selected_datacentre %}selected{% endif %}>
+                                {{ dc }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Microservice Selection -->
+                    <div class="mb-3">
+                        <label for="microservice" class="form-label">5. Select Microservice:</label>
+                        <select class="form-select" id="microservice" name="microservice" {% if not selected_application or not selected_environment or not selected_space %}disabled{% endif %} required>
+                            <option value="">
+                                {% if not selected_application or not selected_environment or not selected_space %}
+                                    Please select application, environment and space first to load microservices
+                                {% else %}
+                                    Select a microservice...
+                                {% endif %}
+                            </option>
+                            {% for microservice in microservices %}
+                            <option value="{{ microservice }}" {% if microservice == selected_microservice %}selected{% endif %}>
+                                {{ microservice }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <div id="microserviceLoading" class="text-muted mt-1" style="display: none;">
+                            <i class="fas fa-spinner fa-spin"></i> Loading microservices...
+                        </div>
+                        {% if microservice_error %}
+                        <div class="alert alert-warning mt-2" role="alert">
+                            <i class="fas fa-exclamation-triangle"></i> {{ microservice_error }}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Action Selection -->
+                    <div class="mb-3">
+                        <label for="todo" class="form-label">Select Action:</label>
+                        <select class="form-select" id="todo" name="todo" required>
+                            <option value="">Select an action...</option>
+                            {% for todo in todo_options %}
+                            <option value="{{ todo }}" {% if todo == selected_todo %}selected{% endif %}>
+                                {{ todo }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Action Selection -->
+                    <div class="mb-3">
+                        <label for="todo" class="form-label">Select Action:</label>
+                        <select class="form-select" id="todo" name="todo" required>
+                            <option value="">Select an action...</option>
+                            {% for todo in todo_options %}
+                            <option value="{{ todo }}" {% if todo == selected_todo %}selected{% endif %}>
+                                {{ todo }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <hr>
+
+                    <!-- Status and Command Display -->
+                    {% if all_selected %}
+                    <div class="alert alert-success" role="alert">
+                        <i class="fas fa-check-circle"></i> All options selected. Ready to run command.
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Command to execute:</label>
+                        <div class="command-display">{{ command }}</div>
+                        <input type="hidden" name="command" value="{{ command }}">
+                    </div>
+                    <button type="submit" class="btn btn-success btn-lg w-100" formaction="/confirm">
+                        <i class="fas fa-rocket"></i> Run Command
+                    </button>
+                    {% else %}
+                    <div class="alert alert-warning" role="alert">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        Please select: {{ missing_items | join(', ') }}
+                    </div>
+                    <button type="button" class="btn btn-success btn-lg w-100" disabled>
+                        <i class="fas fa-rocket"></i> Run Command
+                    </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status Column -->
+    <div class="col-md-4">
+        <div class="card shadow-sm status-card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle"></i> Current Selection</h5>
+            </div>
+            <div class="card-body">
+                <div class="selection-card p-3 mb-2 rounded">
+                    <strong>Application:</strong> {{ selected_application or 'Not selected' }}
+                </div>
+                <div class="selection-card p-3 mb-2 rounded">
+                    <strong>Environment:</strong> {{ selected_environment or 'Not selected' }}
+                </div>
+                <div class="selection-card p-3 mb-2 rounded">
+                    <strong>Service:</strong> {{ selected_service or 'Not selected' }}
+                </div>
+                <div class="selection-card p-3 mb-3 rounded">
+                    <strong>Action:</strong> {{ selected_todo or 'Not selected' }}
+                </div>
+                
+                {% if services and selected_application and selected_environment %}
+                <div class="alert alert-success" role="alert">
+                    <i class="fas fa-check-circle"></i> 
+                    Found {{ service_count }} services for {{ selected_application }} in {{ selected_environment }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function updateServices() {
+    const application = document.getElementById('application').value;
+    const environment = document.getElementById('environment').value;
+    const serviceSelect = document.getElementById('service');
+    const serviceLoading = document.getElementById('serviceLoading');
+    const form = document.getElementById('configForm');
+    
+    if (!application || !environment) {
+        serviceSelect.innerHTML = '<option value="">Please select application and environment first to load services</option>';
+        serviceSelect.disabled = true;
+        return;
+    }
+    
+    // Show loading state
+    serviceLoading.style.display = 'block';
+    serviceSelect.disabled = true;
+    serviceSelect.innerHTML = '<option value="">Loading services...</option>';
+    form.classList.add('loading');
+    
+    // Make AJAX request to get services
+    axios.post('/get_services', {
+        application: application,
+        environment: environment
+    })
+    .then(function(response) {
+        const services = response.data.services;
+        const count = response.data.count;
+        
+        // Update service dropdown
+        serviceSelect.innerHTML = '<option value="">Select a service...</option>';
+        services.forEach(function(service) {
+            const option = document.createElement('option');
+            option.value = service;
+            option.textContent = service;
+            serviceSelect.appendChild(option);
+        });
+        
+        serviceSelect.disabled = false;
+        
+        // Update the form to refresh the page with new services
+        form.submit();
+    })
+    .catch(function(error) {
+        console.error('Error loading services:', error);
+        serviceSelect.innerHTML = '<option value="">Error loading services</option>';
+        serviceSelect.disabled = false;
+    })
+    .finally(function() {
+        serviceLoading.style.display = 'none';
+        form.classList.remove('loading');
+    });
+}
+
+document.getElementById('application').addEventListener('change', updateServices);
+document.getElementById('environment').addEventListener('change', updateServices);
+
+// Auto-submit form when selections change (to update the command display)
+document.getElementById('service').addEventListener('change', function() {
+    if (this.value) {
+        document.getElementById('configForm').submit();
+    }
+});
+
+document.getElementById('todo').addEventListener('change', function() {
+    if (this.value) {
+        document.getElementById('configForm').submit();
+    }
+});
+</script>
+{% endblock %}
