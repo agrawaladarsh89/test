@@ -1,0 +1,94 @@
+<div class="row mb-3">
+                    <div class="col-md-2">
+                        <div class="selection-card p-2 rounded">
+                            <strong>Application:</strong><br>{{ selected_application }}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="selection-card p-2 rounded">
+                            <strong>Environment:</strong><br>{{ selected_environment }}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="selection-card p-2 rounded">{% extends "base.html" %}
+
+{% block title %}Confirm Command - PCM Lifecycle Management{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Confirmation Required</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <h6><strong>Are you sure you want to execute the following command?</strong></h6>
+                </div>
+                
+                <div class="command-display mb-4">
+                    <strong>Command:</strong> {{ command }}
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-2">
+                        <div class="selection-card p-2 rounded">
+                            <strong>Application:</strong><br>{{ selected_application }}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="selection-card p-2 rounded">
+                            <strong>Environment:</strong><br>{{ selected_environment }}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="selection-card p-2 rounded">
+                            <strong>Space:</strong><br>{{ selected_space }}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="selection-card p-2 rounded">
+                            <strong>Datacentre:</strong><br>{{ selected_datacentre }}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="selection-card p-2 rounded">
+                            <strong>Microservice:</strong><br>{{ selected_microservice }}
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="selection-card p-2 rounded">
+                            <strong>Action:</strong><br>{{ selected_action }}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6">
+                        <form method="POST" action="/execute">
+                            <input type="hidden" name="command" value="{{ command }}">
+                            <button type="submit" class="btn btn-success btn-lg w-100" id="executeBtn">
+                                <i class="fas fa-check-circle"></i> Yes, Execute
+                            </button>
+                        </form>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="/" class="btn btn-secondary btn-lg w-100">
+                            <i class="fas fa-times-circle"></i> No, Cancel
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('executeBtn').addEventListener('click', function() {
+    this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executing...';
+    this.disabled = true;
+});
+</script>
+{% endblock %}
