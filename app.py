@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, session
 import subprocess
 import json
+import re
 from typing import List, Optional
 
 app = Flask(__name__)
@@ -33,39 +34,59 @@ def get_microservices_for_app_env_space(application: str, environment: str, spac
     success, output = run_command(command)
     
     if success and output:
-        # Parse the output to extract microservice names
-        # This assumes the output is either:
-        # 1. One microservice per line
-        # 2. JSON array format
-        # 3. Comma/space separated values
-        
         microservices = []
         
-        # Try to parse as JSON first
-        try:
-            import json
-            parsed = json.loads(output)
-            if isinstance(parsed, list):
-                microservices = [str(item).strip() for item in parsed if str(item).strip()]
-            elif isinstance(parsed, dict) and 'apps' in parsed:
-                microservices = [str(app).strip() for app in parsed['apps'] if str(app).strip()]
-            else:
-                microservices = [str(parsed).strip()] if str(parsed).strip() else []
-        except (json.JSONDecodeError, ValueError):
-            # If not JSON, try line-by-line parsing
-            lines = output.split('\n')
-            for line in lines:
-                line = line.strip()
-                if line and not line.startswith('#') and not line.startswith('-'):
-                    # Skip header lines or comment lines
-                    # Split by common separators and take the first meaningful part
-                    parts = line.split()
-                    if parts:
-                        microservices.append(parts[0])
+        # Handle the format: http response code: ["a","b","c","d"]
+        # First, try to find JSON array pattern in the output
+        json_pattern = r'\[\s*"[^"]*"(?:\s*,\s*"[^"]*")*\s*\]'
+        json_match = re.search(json_pattern, output)
         
-        # Remove duplicates and empty entries
-        microservices = list(set([ms for ms in microservices if ms and ms.strip()]))
-        return sorted(microservices)
+        if json_match:
+            # Found JSON array pattern, extract and parse it
+            json_str = json_match.group()
+            try:
+                parsed = json.loads(json_str)
+                if isinstance(parsed, list):
+                    microservices = [str(item).strip().strip('"') for item in parsed if str(item).strip()]
+                else:
+                    microservices = [str(parsed).strip().strip('"')] if str(parsed).strip() else []
+            except (json.JSONDecodeError, ValueError):
+                pass
+        
+        # If JSON parsing didn't work, try alternative parsing methods
+        if not microservices:
+            # Try to parse as full JSON first
+            try:
+                parsed = json.loads(output)
+                if isinstance(parsed, list):
+                    microservices = [str(item).strip().strip('"') for item in parsed if str(item).strip()]
+                elif isinstance(parsed, dict) and 'apps' in parsed:
+                    microservices = [str(app).strip().strip('"') for app in parsed['apps'] if str(app).strip()]
+                else:
+                    microservices = [str(parsed).strip().strip('"')] if str(parsed).strip() else []
+            except (json.JSONDecodeError, ValueError):
+                # If not JSON, try line-by-line parsing
+                lines = output.split('\n')
+                for line in lines:
+                    line = line.strip()
+                    if line and not line.startswith('#') and not line.startswith('-') and not line.lower().startswith('http'):
+                        # Skip header lines, comment lines, or HTTP response lines
+                        # Split by common separators and take the first meaningful part
+                        parts = line.split()
+                        if parts:
+                            microservices.append(parts[0].strip('"').strip("'"))
+        
+        # Clean up microservice names - remove quotes, brackets, commas
+        cleaned_microservices = []
+        for ms in microservices:
+            # Remove common unwanted characters
+            cleaned = re.sub(r'["\[\],]', '', str(ms)).strip()
+            if cleaned and cleaned.lower() not in ['http', 'response', 'code']:
+                cleaned_microservices.append(cleaned)
+        
+        # Remove duplicates and empty entries, then sort
+        microservices = sorted(list(set([ms for ms in cleaned_microservices if ms and ms.strip()])))
+        return microservices
     else:
         # Return empty list if command fails
         return []
