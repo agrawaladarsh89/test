@@ -1,0 +1,43 @@
+Subject: SLX Request Process for Accessing IFP Signed Documents from Adobe Portal
+
+Dear Team,
+
+Please find below the process to raise an SLX request for accessing IFP signed documents from the Adobe portal.
+
+⸻
+
+1. Purpose
+
+This communication provides step-by-step guidance for bank users to raise SLX requests to access IFP signed documents from the Adobe portal.
+
+⸻
+
+2. Prerequisites
+	•	SLX request must be raised by the user’s Line Manager and approved by Tony Magromallis.
+	•	Request can be submitted for multiple RACFIDs.
+	•	Access can be raised for a maximum duration of 1 year.
+
+⸻
+
+3. Request Submission Process
+	1.	Open the SLX request link:
+SLX Access Request
+	2.	Select the checkbox “I confirm that I am the user’s line manager.”
+	3.	Choose Domain = Europa.
+	4.	Provide the user’s RACFID(s) and click Add to List (multiple RACFIDs can be added).
+	5.	Select the relevant option as ADD.
+	6.	Enter the Adobe URL in the blocked site section:
+https://dmolive.eu1.adobesign.com
+	7.	Set Website Category = Large File Downloads (Bluecoat).
+	8.	Select Start and End Date/Time (maximum of 1 year).
+	9.	Select Authoriser’s Department = Digital X – Technology.
+	10.	Enter Authoriser’s Name = Tony Magromallis.
+	11.	Business Justification:
+This request is raised to access Adobe signed copies directly from the Adobe portal.
+	12.	Click Finish.
+
+⸻
+
+Approval
+
+The request will require approval from Tony Magromallis and will reflect after a few hours.
