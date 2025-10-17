@@ -1,0 +1,32 @@
+Here’s a polished and business-ready version of your note:
+
+⸻
+
+Problem Statement
+
+It has been identified that certain customers were missed from receiving their Overdraft (OD) digital letters.
+
+Scope of Impact
+
+Since ODRP went live in June 2024, the impacted population includes customers from June 2025 to September 2025 batches.
+
+Root Cause
+
+The issue occurred because the “Shared When” column in Eflex was not reset to null after the 2024 batch.
+This column acts as a control flag to determine whether a bin should be picked up by the ODRP batch for letter generation. As the flag was not reset, the system treated those bins as already processed, resulting in missed digital letter generation for 2025.
+
+Business Impact
+
+If digital letters were not sent to the impacted customers, the SSI team is currently validating whether hard copies were issued manually.
+If manual letters were also missed, the bank may be exposed to potential compliance penalties for not notifying customers within the required timeframe.
+
+Immediate Action Plan
+
+For the October batch (covering renewals for December 2025 and January 2026), the Eflex team will manually reset the “Shared When” column based on the identified impacted records.
+This activity will be completed post-SSI upload next week to ensure all eligible bins are correctly processed.
+
+Permanent Fix
+
+From the November batch onward, the Eflex team will implement an automated fix to ensure the “Shared When” column is reset through code logic, eliminating manual intervention and preventing recurrence of this issue.
+
+⸻
