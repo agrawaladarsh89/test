@@ -1,0 +1,66 @@
+Excellent — this is a great real-world process for defining SLIs (Service Level Indicators) and SLOs (Service Level Objectives).
+Let’s break your Overdraft Renewal Process (ODRP) down and derive meaningful metrics.
+
+⸻
+
+🏦 Process Summary (as you described)
+	•	Every month, a batch identifies customers whose overdraft renewal is due in the next 2–3 months.
+	•	A digital renewal letter is sent.
+	•	Customers get 14 days to respond, with reminders on Day 5 and Day 10 (including in-app notifications).
+	•	On Day 15, the ODRP expires if the customer hasn’t responded.
+
+⸻
+
+🧮 1️⃣ Service Level Indicators (SLIs)
+
+SLIs are the quantitative measurements that show how the system or process is performing.
+
+SLI Name	Definition	Measurement Approach
+Letter Delivery Success Rate	% of digital letters successfully sent and received by customers.	(Successful sends ÷ Total sends) × 100
+Reminder Delivery Success Rate	% of reminder notifications (Day 5 & Day 10) delivered successfully.	(Delivered reminders ÷ Total reminders) × 100
+Customer Response Rate	% of customers who respond to the renewal letter before expiry.	(Responses before Day 15 ÷ Total letters sent) × 100
+Processing Accuracy	% of overdraft renewal cases processed without manual correction or error.	(Error-free cases ÷ Total processed cases) × 100
+Batch Completion Timeliness	% of monthly renewal batches completed within defined schedule (end-of-month SLA).	(On-time batches ÷ Total batches) × 100
+Hermès Notification Delivery SLI	% of mobile app notifications successfully triggered and acknowledged.	(Notifications acknowledged ÷ Notifications triggered) × 100
+Expired Letter Rate	% of letters that expired without response.	(Expired letters ÷ Total letters sent) × 100
+
+
+⸻
+
+🎯 2️⃣ Service Level Objectives (SLOs)
+
+SLOs are target values or thresholds for each SLI — i.e., what you aim to achieve.
+
+SLI	SLO (Target)
+Letter Delivery Success Rate	≥ 99% successful digital letter delivery per batch.
+Reminder Delivery Success Rate	≥ 98% reminder delivery within Day 5 and Day 10 timelines.
+Customer Response Rate	≥ 75% customers to respond within 14 days.
+Processing Accuracy	≥ 99.5% accuracy in ODRP processing.
+Batch Completion Timeliness	100% of monthly ODRP batches completed before month-end.
+Hermès Notification Delivery SLI	≥ 98% successful push notifications.
+Expired Letter Rate	≤ 10% of letters to expire without response.
+
+
+⸻
+
+⚙️ 3️⃣ Optional Internal SLIs (Operational)
+
+If you want to measure internal efficiency of the ODRP process:
+
+SLI	SLO
+Batch Run Success Rate	≥ 99.8% successful execution of scheduled batch jobs.
+Data Extraction Accuracy	≥ 99.9% accuracy in customer BIN/CIN mapping.
+Letter Generation Turnaround	≤ 2 hours to generate and send all letters post batch identification.
+
+
+⸻
+
+✅ Summary
+
+In plain English:
+	•	Your SLIs will measure delivery success, timeliness, accuracy, and response rate.
+	•	Your SLOs will set targets like 99% delivery, 75% customer response, and <10% expiry.
+
+⸻
+
+Would you like me to also include Error Budget calculation for this process (e.g., how much downtime or failure is allowed before SLO breach)? It will make it complete from an SRE assessment point of view.
