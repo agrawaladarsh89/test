@@ -1,0 +1,23 @@
+⸻
+
+Subject: Urgent: Factflow Login and OTP Email Issue – INC9230756
+
+Hi Team,
+
+We are currently facing an issue with Factflow login, where users are unable to receive OTP emails. This is an intermittent issue impacting all three brands.
+
+Incident Reference: INC9230756 (already assigned)
+
+Impact:
+Factflow is a customer-facing application under Lending – Invoice Finance, operating 24x7. Due to this issue, users are unable to log in as OTP emails are not being delivered because of an EWS server error (details attached).
+
+The Messaging team has already restarted all 16 Exchange servers as part of their troubleshooting process.
+
+We are currently on a call to discuss this issue – [Zoom Link: zoom-meet.kalyani].
+
+Kindly treat this as a high-priority incident. The issue has been ongoing for almost 4 hours, and the root cause is still unidentified. Immediate attention is required to restore service availability.
+
+Thanks and Regards,
+Kalyani Agrawal
+Production Analyst – Invoice Finance
+Lending – Commercial & Institutional CDIO | DigitalX
