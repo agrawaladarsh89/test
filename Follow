@@ -1,0 +1,11 @@
+Biswajit,
+Thanks for providing the information and the draft for the Root Cause Analysis (RCA).
+I have a few follow-up questions regarding the key point highlighted:
+1. End-of-Life (EOL) Risk: You mentioned that since Exchange 2016 is out of vendor support and its EOL, a risk has been raised.
+• Could you please specify the exact risk that has been raised? (e.g., security vulnerability, compliance failure, system instability/failure, data loss, etc.)
+• Could you also share the remediation plan that has been put in place to address this EOL risk (e.g., plan to migrate to Exchange Online/2019, timeline, responsible team)?
+2. Root Cause Identification: The second point states: "MS was not ready to support to identify the root cause as there is no active issue for now."
+• To be clear, does "MS" refer to Microsoft as the vendor, or is it an internal team?
+• Could you elaborate on the statement "there is no active issue for now"? The current incident did happen, so we need to understand the specific mechanism that caused the past incident. Could you detail what steps are being taken to retroactively identify the root cause for the incident that has already occurred?
+A more detailed explanation of the actual technical cause that led to the incident, along with the EOL remediation plan, is crucial for concluding the RCA and preventing recurrence.
+Thanks, and I look forward to your response.
