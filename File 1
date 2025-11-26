@@ -1,0 +1,27 @@
+Here is a polished, clear, and professional rephrased version of your email:
+
+⸻
+
+Hi Ainu,
+
+Issue:
+The new Multi-Client Guarantee generated in IFP has included Nexere Consulting Limited even when they are supposed to be released from the current guarantee. They are not being excluded in the new guarantee.
+
+Reported Application: Invoice Finance Platform – InLife
+
+Impact:
+The Document Team is unable to accept the document because the generated output is incorrect.
+
+Workaround:
+The document is currently being prepared manually by the Docs Team.
+
+Root Cause:
+As discussed with you, there is no filter applied to exclude the Released securities (whether fully or partially) during document generation. A new requirement JIRA needs to be raised to ensure securities with release type as “Fully” are excluded. The approach for handling Partial securities is still under discussion.
+
+Requirement / JIRA:
+Requesting your support to prioritize this and get it fixed in PROD.
+
+Thanks and Regards,
+Kalyani Agrawal
+Production Analyst – Invoice Finance
+Lending – Commercial & Institutional CDIO | DigitalX
