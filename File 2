@@ -1,0 +1,39 @@
+Second message -
+
+Here is a clean, professional, and well-structured rephrased version of your email:
+
+⸻
+
+Hi Ainu,
+
+Issue:
+IFP is generating a Multi-Party Guarantee document even though there is only a single security guarantor. The expected behaviour is to generate a Corporate Guarantee letter, not a multi-party guarantee.
+
+Reported Application:
+Invoice Finance Platform – InLife
+IFP00048833 DHMB Limited
+
+Impact:
+The Document Team is unable to accept the document because the generated output is incorrect.
+
+Root Cause:
+As discussed on the call, this occurred because the user added a new security and updated the existing corporate guarantee security. As a result, the application has treated this as two separate securities and generated a multi-party guarantee letter.
+
+JIRA:
+(To be raised for the required fix.)
+
+Workaround:
+The Corporate Guarantee document is currently being prepared manually by the Docs Team.
+
+Requesting your support to prioritise this and have it fixed in PROD.
+
+Thanks and Regards,
+Kalyani Agrawal | Production Analyst – Invoice Finance
+Lending – Commercial & Institutional CDIO | DigitalX
+NatWest Group
+Mobile: +91 9673114564
+Email: Kalyani.agrawal@natwest.com
+
+⸻
+
+If you want, I can also create a more concise or more formal escalation version.
