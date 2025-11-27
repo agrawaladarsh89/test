@@ -1,0 +1,25 @@
+Here is a clean, professional JIRA-ready scenario format based on the content in your screenshot:
+
+⸻
+
+JIRA – Requirement Scenarios
+
+Scenario 1 – Corporate Guarantee (Subtype: Corporate) with Multiple Providers
+If there are two securities with the name Corporate Guarantee and subtype Corporate, each associated with two different service providers (status = NEW), then:
+	•	The system must generate two separate Corporate Guarantee documents, one for each service provider.
+
+⸻
+
+Scenario 2 – Corporate Guarantee (Subtype: Multiparty)
+If there are two securities with the name Corporate Guarantee and subtype Multiparty, then:
+	•	The system must generate a single multiparty document that includes both service providers.
+
+⸻
+
+Scenario 3 – Amendment Logic Update
+Currently, if more than one security amendment exists, the system generates a multiparty document by default.
+	•	This logic must be updated so that the system generates the document based strictly on the subtype selected by the user, instead of defaulting to multiparty.
+
+⸻
+
+If you’d like, I can convert this into Given–When–Then (BDD) format as well.
