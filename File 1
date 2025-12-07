@@ -1,27 +1,98 @@
-Here is a polished, clear, and professional rephrased version of your email:
+import pyautogui
+import time
+import subprocess
 
-⸻
+# Configuration
+APP_PATH = r"C:\Path\To\Your\Application.exe"  # Update this path
+USERNAME = "your_username"
+PASSWORD = "your_password"
+DELAY = 2  # Seconds to wait between actions
 
-Hi Ainu,
+# Dropdown coordinates (you'll need to update these)
+DROPDOWN_X = 500  # X coordinate of the dropdown
+DROPDOWN_Y = 200  # Y coordinate of the dropdown
+RUN_SQL_X = 500   # X coordinate of "Run SQL Scripts" option
+RUN_SQL_Y = 250   # Y coordinate of "Run SQL Scripts" option
 
-Issue:
-The new Multi-Client Guarantee generated in IFP has included Nexere Consulting Limited even when they are supposed to be released from the current guarantee. They are not being excluded in the new guarantee.
+def launch_application():
+    """Launch the application"""
+    print("Launching application...")
+    subprocess.Popen(APP_PATH)
+    time.sleep(5)  # Wait for app to load
 
-Reported Application: Invoice Finance Platform – InLife
+def login(username, password):
+    """Perform login using keyboard automation"""
+    print("Starting login process...")
+    
+    # Wait for app to be ready
+    time.sleep(DELAY)
+    
+    # Type username
+    print("Entering username...")
+    pyautogui.write(username, interval=0.1)
+    
+    # Press Tab to move to password field
+    pyautogui.press('tab')
+    time.sleep(0.5)
+    
+    # Type password
+    print("Entering password...")
+    pyautogui.write(password, interval=0.1)
+    
+    # Press Enter to submit
+    time.sleep(0.5)
+    pyautogui.press('enter')
+    
+    print("Login completed!")
+    time.sleep(3)  # Wait for login to complete
 
-Impact:
-The Document Team is unable to accept the document because the generated output is incorrect.
+def select_run_sql_scripts():
+    """Click on Action dropdown and select Run SQL Scripts"""
+    print("Opening Action dropdown...")
+    
+    # Click on the Action dropdown
+    pyautogui.click(DROPDOWN_X, DROPDOWN_Y)
+    time.sleep(1)
+    
+    # Click on "Run SQL Scripts" option
+    print("Selecting 'Run SQL Scripts'...")
+    pyautogui.click(RUN_SQL_X, RUN_SQL_Y)
+    time.sleep(1)
+    
+    print("Run SQL Scripts selected!")
 
-Workaround:
-The document is currently being prepared manually by the Docs Team.
+def get_mouse_position():
+    """Helper function to find coordinates - run this separately"""
+    print("Move your mouse to the target location...")
+    print("Printing coordinates for 10 seconds (press Ctrl+C to stop)")
+    try:
+        for i in range(50):
+            x, y = pyautogui.position()
+            print(f"X: {x}, Y: {y}", end='\r')
+            time.sleep(0.2)
+    except KeyboardInterrupt:
+        print("\nStopped.")
 
-Root Cause:
-As discussed with you, there is no filter applied to exclude the Released securities (whether fully or partially) during document generation. A new requirement JIRA needs to be raised to ensure securities with release type as “Fully” are excluded. The approach for handling Partial securities is still under discussion.
+def main():
+    # Give yourself time to position windows if needed
+    print("Starting in 3 seconds...")
+    time.sleep(3)
+    
+    # Launch the application
+    launch_application()
+    
+    # Perform login
+    login(USERNAME, PASSWORD)
+    
+    # Select Run SQL Scripts from dropdown
+    select_run_sql_scripts()
 
-Requirement / JIRA:
-Requesting your support to prioritize this and get it fixed in PROD.
-
-Thanks and Regards,
-Kalyani Agrawal
-Production Analyst – Invoice Finance
-Lending – Commercial & Institutional CDIO | DigitalX
+if __name__ == "__main__":
+    # Safety feature: Move mouse to corner to abort
+    pyautogui.FAILSAFE = True
+    print("Move mouse to top-left corner to abort")
+    
+    # Uncomment the line below to find coordinates first
+    # get_mouse_position()
+    
+    main()
