@@ -1,0 +1,19 @@
+Slide 1: Key Highlights & Positive Outcomes
+	•	Multiple DB remediations were performed for termination applications to revert application states and reopen locked sections, enabling users to successfully complete termination applications.
+	•	On 9th December, 47 applications (including termination applications) were auto-cancelled. The team performed DB remediation to allow users to continue working on these applications, thereby mitigating business impact.
+	•	The team is proactively monitoring the CRM issue to support business users and minimize any potential business impact.
+	•	Weekly BAU activities were completed successfully, including:
+	•	IFP Unix patching
+	•	FacFlow Unix patching
+	•	Autosys server patching
+	•	Post-patching sanity checks and microservices restart
+	•	ODRP and reminder batches were executed independently, and WIP progress cases from previous batches were replayed successfully.
+	•	EAR rate change was implemented and verified with the business in ODRP to ensure correct EAR rates are reflected in overdraft templates.
+
+⸻
+
+Slide 2: Learning & Corrective Measures
+	•	Automation-based business verification has been implemented to reduce manual dependency and improve accuracy.
+	•	Automation health checks have been set up to enable early detection of issues.
+	•	A Splunk alert has been configured to proactively monitor document upload failures in IFP.
+
